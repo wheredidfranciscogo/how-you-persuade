@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1B1714">
+<title>Peitho: how you persuade</title>
+<meta name="description" content="Drag the dot. Hear how your mix of ethos, pathos and logos sounds when you ask for a raise.">
+<style>
+/* GFS Neohellenic and Didact Gothic, SIL Open Font License 1.1, via Fontsource on jsDelivr. */
+@font-face{font-family:'GFS Neohellenic';font-weight:400;font-display:block;src:url(https://cdn.jsdelivr.net/npm/@fontsource/gfs-neohellenic@5.3.0/files/gfs-neohellenic-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+2018-201F,U+2026}
+@font-face{font-family:'GFS Neohellenic';font-weight:700;font-display:block;src:url(https://cdn.jsdelivr.net/npm/@fontsource/gfs-neohellenic@5.3.0/files/gfs-neohellenic-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+2018-201F,U+2026}
+@font-face{font-family:'GFS Neohellenic';font-weight:700;font-display:block;src:url(https://cdn.jsdelivr.net/npm/@fontsource/gfs-neohellenic@5.3.0/files/gfs-neohellenic-greek-700-normal.woff2) format('woff2');unicode-range:U+0370-03FF}
+@font-face{font-family:'Didact Gothic';font-weight:400;font-display:block;src:url(https://cdn.jsdelivr.net/npm/@fontsource/didact-gothic@5.3.0/files/didact-gothic-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+2018-201F,U+2026}
+/* Palette taken from Attic red-figure ware: black gloss ground, reserved clay figures,
+   and the three added colours painters used on top: white, yellow ochre, red. */
+:root{
+  --gloss:#1B1714; --gloss-2:#2A231E;
+  --clay:#D9824F;            /* reserved Attic clay */
+  --white:#EFE4CF;           /* added white */
+  --ochre:#D8B36A;           /* added yellow (white clay + ochre) */
+  --faded:#B08A74;           /* faded terracotta, for secondary text */
+  --ethos:var(--ochre); --pathos:var(--clay); --logos:var(--white);
+  --display:"GFS Neohellenic", Georgia, serif;
+  --inscr:"Didact Gothic", "Helvetica Neue", Arial, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--gloss);color:var(--white)}
+body{display:flex;justify-content:center;align-items:center;font-family:var(--display);-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+#root{display:contents}
+
+.stage{
+  width:min(100vw, calc(100dvh * 9 / 16));
+  height:min(100dvh, calc(100vw * 16 / 9));
+  container-type:size;
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding:2.4cqh 5cqw 2.2cqh;
+  overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;
+}
+
+/* Vase registers: ornament bands frame each zone. */
+.meander{display:block;width:100%;height:4.2cqw;flex:none}
+.meander path{fill:none;stroke:var(--clay);stroke-width:1.6;stroke-linecap:square;stroke-linejoin:miter}
+.dots{display:block;width:100%;height:2cqw;flex:none}
+.dots circle{fill:var(--clay)}
+
+/* Inscriptions: monoline capitals, wide tracking. */
+.insc{font-family:var(--inscr);text-transform:uppercase;letter-spacing:.28em;font-size:2.7cqw}
+.faded{color:var(--faded)}
+
+.title{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
+.title .sub{text-align:right;line-height:1.6}
+.title .gr{font-family:var(--display);font-weight:700;font-size:7.4cqw;letter-spacing:.18em;color:var(--clay);line-height:1}
+
+/* Full column width, so the triangle lines up with the text below it. */
+.tri{position:relative;width:100%;flex:none}
+.tri svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.dot{position:absolute;left:0;top:0;width:8.6cqw;height:8.6cqw;margin:-4.3cqw 0 0 -4.3cqw;border-radius:50%;
+  background:var(--white);box-shadow:0 0 0 1cqw var(--gloss),0 0 0 1.7cqw var(--clay);cursor:grab;touch-action:none}
+.dot::after{content:"";position:absolute;inset:2.6cqw;border-radius:50%;background:var(--clay)}
+.dot:active{cursor:grabbing}
+.ring{position:absolute;inset:-1.7cqw;border-radius:50%;border:2px solid var(--clay);pointer-events:none}
+.hint{position:absolute;left:0;right:0;top:56%;text-align:center;pointer-events:none}
+
+.pcts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.pct .n{font-family:var(--display);font-weight:700;font-size:11cqw;line-height:.95;font-variant-numeric:lining-nums tabular-nums}
+.pct .n small{font-size:4.8cqw;margin-left:.4cqw}
+.pct .l{margin-top:.6cqw}
+.pct:nth-child(2){text-align:center}.pct:nth-child(3){text-align:right}
+
+/* Room for the longest pitch (4 lines), so nothing below jumps while you drag. */
+.pitch-wrap{min-height:calc(4 * 4.5cqw * 1.3 + 4.2cqw)}
+.pitch{margin-top:1.4cqw;font-family:var(--display);font-size:4.5cqw;line-height:1.3}
+.pitch .ethos{color:var(--ethos)} .pitch .pathos{color:var(--pathos)} .pitch .logos{color:var(--logos)}
+
+.boss{border-top:1.5px solid var(--clay);padding-top:2.2cqw}
+.reply{font-family:var(--display);font-weight:700;font-size:7.4cqw;line-height:1.02;margin-top:.8cqw;min-height:7.6cqw;color:var(--white);letter-spacing:.02em}
+.meter{display:flex;align-items:center;gap:2.4cqw;margin-top:2cqw}
+.bar{flex:1;height:2.8cqw;border:1.5px solid var(--clay);padding:2px}
+.fill{height:100%;background:var(--clay);transform-origin:left center}
+.score{font-family:var(--display);font-weight:700;font-size:5.6cqw;width:13cqw;text-align:right;color:var(--clay);font-variant-numeric:lining-nums tabular-nums}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/Draggable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+<script>
+(() => {
+  const { useState, useRef, useLayoutEffect, useEffect } = React;
+  const h = React.createElement;
+  gsap.registerPlugin(Draggable, SplitText);
+
+  // Triangle corners in SVG units (viewBox 300 x H).
+  // Equilateral: side 294, height 294 * sqrt(3) / 2.
+  const SIDE = 294, TH = SIDE * Math.sqrt(3) / 2;
+  const A = { x: 150, y: 36 };                    // ETHOS, top
+  const B = { x: 150 - SIDE / 2, y: 36 + TH };    // PATHOS, bottom left
+  const C = { x: 150 + SIDE / 2, y: 36 + TH };    // LOGOS, bottom right
+  const W = 300, H = Math.ceil(B.y + 24);
+  const G = { x: (A.x + B.x + C.x) / 3, y: (A.y + B.y + C.y) / 3 };
+  const inset = (q, k) => `${G.x + (q.x - G.x) * k},${G.y + (q.y - G.y) * k}`;
+  const KEYS = ['ethos', 'pathos', 'logos'];
+
+  // Point -> barycentric weights, clamped inside the triangle.
+  function weightsAt(p) {
+    const v0x = B.x - A.x, v0y = B.y - A.y, v1x = C.x - A.x, v1y = C.y - A.y, v2x = p.x - A.x, v2y = p.y - A.y;
+    const d00 = v0x * v0x + v0y * v0y, d01 = v0x * v1x + v0y * v1y, d11 = v1x * v1x + v1y * v1y;
+    const d20 = v2x * v0x + v2y * v0y, d21 = v2x * v1x + v2y * v1y;
+    const den = d00 * d11 - d01 * d01;
+    let v = (d11 * d20 - d01 * d21) / den, w = (d00 * d21 - d01 * d20) / den, u = 1 - v - w;
+    u = Math.max(0, u); v = Math.max(0, v); w = Math.max(0, w);
+    const s = u + v + w || 1;
+    return { ethos: u / s, pathos: v / s, logos: w / s };
+  }
+  const pointAt = wt => ({
+    x: wt.ethos * A.x + wt.pathos * B.x + wt.logos * C.x,
+    y: wt.ethos * A.y + wt.pathos * B.y + wt.logos * C.y
+  });
+
+  // Whole percentages that always add up to 100.
+  function percents(wt) {
+    const raw = KEYS.map(k => wt[k] * 100), fl = raw.map(Math.floor);
+    let left = 100 - fl.reduce((a, b) => a + b, 0);
+    raw.map((r, i) => [r - fl[i], i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if (left-- > 0) fl[i]++; });
+    return { ethos: fl[0], pathos: fl[1], logos: fl[2] };
+  }
+
+  // The same ask, four strengths per appeal. Level 3 is the caricature.
+  const LINES = {
+    ethos:  ['', "I've been here three years.", "I've led our last two launches and trained every new hire.", "Let's be honest, nobody here knows this system like I do."],
+    pathos: ['', 'I really love this team.', 'I want to build my future here, but lately I feel stuck.', 'I lie awake wondering if anyone here even values me.'],
+    logos:  ['', 'My role has grown a lot.', 'My workload is up 40%, and the market pays 15% more.', "I've attached 14 benchmarks, 3 salary surveys and a regression model."]
+  };
+  const level = w => w < 0.12 ? 0 : w < 0.30 ? 1 : w < 0.55 ? 2 : 3;
+
+  function pitchOf(wt) {
+    // You lead with your strongest appeal.
+    return KEYS.slice().sort((a, b) => wt[b] - wt[a])
+      .map(k => ({ k, text: LINES[k][level(wt[k])] }))
+      .filter(s => s.text);
+  }
+
+  function verdict(wt) {
+    const dev = KEYS.reduce((s, k) => s + (wt[k] - 1 / 3) ** 2, 0);
+    const min = Math.min(...KEYS.map(k => wt[k]));
+    const top = KEYS.slice().sort((a, b) => wt[b] - wt[a])[0];
+    const score = Math.round(Math.max(0, 100 * (1 - dev / (2 / 3))) * Math.min(1, min / 0.12));
+    let reply;
+    if (wt[top] > 0.62) reply = { ethos: 'Nobody is irreplaceable.', pathos: 'Maybe take some leave?', logos: "I'll read it. Later." }[top];
+    else if (wt.ethos < 0.12) reply = 'Why you, though?';
+    else if (wt.pathos < 0.12) reply = 'Do you even want this?';
+    else if (wt.logos < 0.12) reply = 'Based on what?';
+    else reply = score >= 85 ? "OK. Let's talk numbers." : "I'll think about it.";
+    return { score, reply };
+  }
+
+  // Engineers start here.
+  const START = { ethos: 0.2, pathos: 0.08, logos: 0.72 };
+
+  // Running meander (Greek key): border lines with hooks, drawn as one stroke.
+  function meanderPath(width) {
+    const t = 14, top = 1, bot = 21;
+    let d = `M0,${top} H${width} M0,${bot} H${width}`;
+    for (let o = 2; o + 12 <= width; o += t) {
+      d += ` M${o},${bot} V${top + 4} H${o + 11} V${bot - 4} H${o + 4} V${top + 8} H${o + 7} V${top + 12}`;
+    }
+    return d;
+  }
+  const MEANDER = meanderPath(300);
+
+  function Meander() {
+    return h('svg', { className: 'meander', viewBox: '0 0 300 22', preserveAspectRatio: 'none', 'aria-hidden': 'true' },
+      h('path', { d: MEANDER }));
+  }
+  function Dots() {
+    const c = [];
+    for (let x = 4; x < 300; x += 8) c.push(h('circle', { key: x, cx: x, cy: 3, r: 1.6 }));
+    return h('svg', { className: 'dots', viewBox: '0 0 300 6', preserveAspectRatio: 'none', 'aria-hidden': 'true' }, c);
+  }
+
+  function Pitch({ parts }) {
+    const ref = useRef(null);
+    useLayoutEffect(() => {
+      const split = SplitText.create(ref.current, { type: 'words' });
+      const tw = gsap.from(split.words, { y: 10, opacity: 0, duration: 0.35, stagger: 0.018, ease: 'power2.out' });
+      return () => { tw.kill(); split.revert(); };
+    }, []);
+    return h('div', { className: 'pitch', ref },
+      // quotes ride on the first and last sentence so they never wrap onto their own line
+      parts.map((p, i) => h('span', { key: p.k + i, className: p.k },
+        (i ? ' ' : '“') + p.text + (i === parts.length - 1 ? '”' : ''))));
+  }
+
+  function Boss({ wt }) {
+    const { score, reply } = verdict(wt);
+    const replyRef = useRef(null), fillRef = useRef(null), scoreRef = useRef(null), shown = useRef({ v: 0 });
+    useLayoutEffect(() => {
+      gsap.fromTo(replyRef.current, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: 'power2.out' });
+    }, [reply]);
+    useEffect(() => {
+      gsap.to(fillRef.current, { scaleX: score / 100, duration: 0.45, ease: 'power3.out' });
+      gsap.to(shown.current, { v: score, duration: 0.45, ease: 'power3.out', overwrite: true,
+        onUpdate: () => { scoreRef.current.textContent = Math.round(shown.current.v) + '%'; } });
+    }, [score]);
+    return h('div', { className: 'boss' },
+      h('div', { className: 'insc faded' }, 'The boss says'),
+      h('div', { className: 'reply', ref: replyRef, 'aria-live': 'polite' }, reply),
+      h('div', { className: 'meter' },
+        h('span', { className: 'insc faded' }, 'Convinced'),
+        h('div', { className: 'bar' }, h('div', { className: 'fill', ref: fillRef, style: { transform: 'scaleX(0)' } })),
+        h('span', { className: 'score', ref: scoreRef }, '0%')));
+  }
+
+  function Corner({ x, y, anchor, gr, en, color, dy }) {
+    return h('text', { x, y: y + dy, textAnchor: anchor },
+      h('tspan', { fill: color, fontFamily: '"GFS Neohellenic", Georgia, serif', fontWeight: 700, fontSize: 18, letterSpacing: 2.2 }, gr),
+      h('tspan', { dx: 6, fill: '#B08A74', fontFamily: '"Didact Gothic", Arial, sans-serif', fontSize: 7.5, letterSpacing: 2.4 }, en));
+  }
+
+  function App() {
+    const [wt, setWt] = useState(START);
+    const stageRef = useRef(null), boxRef = useRef(null), dotRef = useRef(null), ringRef = useRef(null), hintRef = useRef(null);
+
+    useLayoutEffect(() => {
+      const box = boxRef.current, dot = dotRef.current;
+      const scale = () => box.clientWidth / W;
+      const place = w => { const p = pointAt(w); gsap.set(dot, { x: p.x * scale(), y: p.y * scale() }); };
+      place(START);
+
+      // Intro: the ornament bands draw themselves like a painter's brush, then the panel fades up.
+      const paths = stageRef.current.querySelectorAll('.meander path');
+      paths.forEach(p => { const L = p.getTotalLength(); gsap.set(p, { strokeDasharray: L, strokeDashoffset: L }); });
+      const intro = gsap.timeline()
+        .to(paths, { strokeDashoffset: 0, duration: 1.4, ease: 'power1.inOut' })
+        .from('.tri svg .frame', { opacity: 0, duration: 0.5 }, 0.3)
+        .from(dot, { scale: 0, duration: 0.5, ease: 'back.out(2)' }, 0.6);
+
+      const pulse = gsap.to(ringRef.current, { scale: 1.9, opacity: 0, duration: 1.1, repeat: -1, ease: 'power1.out', delay: 1 });
+      let started = false;
+
+      const [drag] = Draggable.create(dot, {
+        type: 'x,y',
+        liveSnap: { points: pt => {
+          const s = scale(), q = pointAt(weightsAt({ x: pt.x / s, y: pt.y / s }));
+          return { x: q.x * s, y: q.y * s };
+        } },
+        onPress() {
+          if (started) return;
+          started = true;
+          pulse.kill(); gsap.to([ringRef.current, hintRef.current], { opacity: 0, duration: 0.3 });
+        },
+        onDrag() { const s = scale(); setWt(weightsAt({ x: this.x / s, y: this.y / s })); }
+      });
+
+      const onResize = () => { setWt(cur => { place(cur); return cur; }); drag.update(); };
+      window.addEventListener('resize', onResize);
+      return () => { window.removeEventListener('resize', onResize); drag.kill(); pulse.kill(); intro.kill(); };
+    }, []);
+
+    const pc = percents(wt);
+    const p = pointAt(wt);
+    const lineW = k => 0.8 + wt[k] * 8;
+    const parts = pitchOf(wt);
+
+    return h('main', { className: 'stage', ref: stageRef },
+      h(Meander),
+      h('div', { className: 'tri', ref: boxRef, style: { aspectRatio: `${W} / ${H}` } },
+        // The title sits in the empty space either side of the apex.
+        h('div', { className: 'title' },
+          h('span', { className: 'gr', lang: 'el' }, 'ΠΕΙΘΩ'),
+          h('span', { className: 'insc faded sub' }, 'How you', h('br'), 'persuade')),
+        h('svg', { viewBox: `0 0 ${W} ${H}`, 'aria-hidden': 'true' },
+          h('g', { className: 'frame' },
+            h('polygon', { points: `${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y}`, fill: '#2A231E', stroke: '#D9824F', strokeWidth: 1.5 }),
+            h('polygon', { points: `${inset(A, .92)} ${inset(B, .92)} ${inset(C, .92)}`, fill: 'none', stroke: '#D9824F', strokeWidth: 0.6, strokeDasharray: '1 3' })),
+          h('line', { x1: p.x, y1: p.y, x2: A.x, y2: A.y, stroke: 'var(--ethos)', strokeWidth: lineW('ethos'), strokeLinecap: 'round' }),
+          h('line', { x1: p.x, y1: p.y, x2: B.x, y2: B.y, stroke: 'var(--pathos)', strokeWidth: lineW('pathos'), strokeLinecap: 'round' }),
+          h('line', { x1: p.x, y1: p.y, x2: C.x, y2: C.y, stroke: 'var(--logos)', strokeWidth: lineW('logos'), strokeLinecap: 'round' }),
+          // Apex label: Greek centred on the point, English trailing to the right.
+          h('text', { x: A.x, y: A.y - 12, textAnchor: 'middle', fill: '#D8B36A', fontFamily: '"GFS Neohellenic", Georgia, serif', fontWeight: 700, fontSize: 18, letterSpacing: 2.2 }, 'ΗΘΟΣ'),
+          h('text', { x: A.x + 32, y: A.y - 12, fill: '#B08A74', fontFamily: '"Didact Gothic", Arial, sans-serif', fontSize: 7.5, letterSpacing: 2.4 }, 'ETHOS'),
+          h(Corner, { x: 0, y: B.y, anchor: 'start', gr: 'ΠΑΘΟΣ', en: 'PATHOS', color: '#D9824F', dy: 21 }),
+          h(Corner, { x: 300, y: C.y, anchor: 'end', gr: 'ΛΟΓΟΣ', en: 'LOGOS', color: '#EFE4CF', dy: 21 })),
+        h('div', { className: 'dot', ref: dotRef, role: 'slider', 'aria-label': `Ethos ${pc.ethos}%, pathos ${pc.pathos}%, logos ${pc.logos}%` },
+          h('div', { className: 'ring', ref: ringRef })),
+        h('div', { className: 'hint insc faded', ref: hintRef }, 'Drag the dot')),
+
+      h(Dots),
+      h('div', { className: 'pcts' },
+        h('div', { className: 'pct' }, h('div', { className: 'n', style: { color: 'var(--ethos)' } }, pc.ethos, h('small', null, '%')), h('div', { className: 'l insc faded' }, 'Credibility')),
+        h('div', { className: 'pct' }, h('div', { className: 'n', style: { color: 'var(--pathos)' } }, pc.pathos, h('small', null, '%')), h('div', { className: 'l insc faded' }, 'Emotion')),
+        h('div', { className: 'pct' }, h('div', { className: 'n', style: { color: 'var(--logos)' } }, pc.logos, h('small', null, '%')), h('div', { className: 'l insc faded' }, 'Logic'))),
+
+      h('div', { className: 'pitch-wrap' },
+        h('div', { className: 'insc faded' }, 'Your pitch, asking for a raise'),
+        // key remounts the node whenever the words change, so SplitText never fights React over the DOM
+        h(Pitch, { key: parts.map(x => x.text).join('|'), parts })),
+
+      h(Boss, { wt }),
+      h(Meander));
+  }
+
+  // Fonts first: SplitText measures words, so it must run after the real glyphs are in.
+  // Fonts load lazily, so ask for every face up front, then render.
+  Promise.all([
+    document.fonts.load('400 1em "GFS Neohellenic"'),
+    document.fonts.load('700 1em "GFS Neohellenic"'),
+    document.fonts.load('700 1em "GFS Neohellenic"', 'ΠΕΙΘΩ'),
+    document.fonts.load('400 1em "Didact Gothic"')
+  ]).catch(() => {}).then(() => ReactDOM.createRoot(document.getElementById('root')).render(h(App)));
+})();
+</script>
+</body>
+</html>
